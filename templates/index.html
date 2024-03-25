@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Форма для загрузки фотографии</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9fa;
+    }
+    .header {
+        background-color: #007bff;
+        color: #fff;
+        padding: 20px 0;
+        text-align: center;
+    }
+    .upload {
+        text-align: center; /* Горизонтальное выравнивание контента по центру */
+    }
+    .container {
+        flex: 1; /* Занимает всю доступную высоту */
+        max-width: 800px;
+        margin: 20px auto;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    .tabs {
+        display: flex;
+        justify-content: center;
+        border-bottom: 2px solid #007bff;
+        margin-bottom: 20px;
+    }
+    .tab {
+        padding: 15px;
+        text-align: center;
+        cursor: pointer;
+        color: #007bff;
+        font-weight: bold;
+        transition: background-color 0.3s;
+    }
+    .tab:hover {
+        background-color: #f8f9fa;
+    }
+    .tab.active {
+        background-color: #007bff;
+        color: #fff;
+    }
+    .content {
+        padding: 20px;
+    }
+    .upload-btn {
+        border: none;
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .upload-btn:hover {
+        background-color: #0056b3;
+    }
+    input[type="file"] {
+        display: none;
+    }
+    .file-label {
+        display: inline-block;
+        padding: 10px 20px;
+        border: 2px solid #007bff;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .file-label:hover {
+        background-color: #f8f9fa;
+    }
+    .about-info {
+        margin-bottom: 20px;
+    }
+    footer {
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px 20px;
+        text-align: center;
+        flex-shrink: 0; /* Заставляем футер оставаться внизу, даже если контент маленький */
+    }
+    .news {
+        margin-bottom: 20px;
+    }
+    .article {
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 20px;
+        cursor: pointer;
+    }
+    .article img {
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 10px;
+    }
+    .article h3 {
+        margin-bottom: 10px;
+    }
+    .article p {
+        margin-bottom: 10px;
+    }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>Добро пожаловать!</h1>
+    <p>На нашем сайте вы можете загрузить свои фотографии и получить результаты обработки.</p>
+</div>
+<div class="container">
+    <div class="tabs">
+        <div class="tab active" onclick="showForm('upload')" data-form="upload">Загрузить фото</div>
+        <div class="tab" onclick="showForm('about')" data-form="about">О нас</div>
+        <div class="tab" onclick="showForm('contacts')" data-form="contacts">Контакты</div>
+        <div class="tab" onclick="showForm('news')" data-form="news">Новости</div>
+    </div>
+    <div class="content">
+        <div class="upload">
+    <form action="{% url 'upload_photo' %}" method="post" enctype="multipart/form-data" class="upload-form">
+        {% csrf_token %}
+        <label for="photo" class="file-label">Выберите фото</label>
+        <input type="file" name="photo" id="photo" accept="image/*" required>
+        <div id="imagePreview" style="text-align: center;"></div> <!-- Превью изображения будет отображаться здесь -->
+        <button type="submit" class="upload-btn">Отправить</button>
+    </form>
+</div>
+        <div class="about" hidden>
+            <h2>О нас</h2>
+            <div class="about-info">
+                <h3>Кто мы?</h3>
+                <p>Мы команда профессионалов, занимающихся обработкой фотографий.</p>
+            </div>
+            <div class="about-info">
+                <h3>Наши цели</h3>
+                <p>Мы стремимся предоставить нашим клиентам лучшие результаты в обработке фотографий.</p>
+            </div>
+            <div class="about-info">
+                <h3>Наши услуги</h3>
+                <p>Мы предлагаем широкий спектр услуг по обработке фотографий, включая редактирование, улучшение качества и многое другое.</p>
+            </div>
+        </div>
+        <div class="contacts" hidden>
+            <h2>Контакты</h2>
+            <p>Телефон: +7 (123) 456-78-90</p>
+            <p>Email: example@example.com</p>
+        </div>
+        <div class="news" hidden>
+            <h2>Новости о AI</h2>
+            <div id="newsList"></div>
+        </div>
+    </div>
+</div>
+<footer>
+    <p>&copy; 2024 Ваше название компании</p>
+</footer>
+
+<script>
+    function showForm(formName) {
+        var forms = document.querySelectorAll('.content > div');
+        var tabs = document.querySelectorAll('.tabs .tab');
+        for (var i = 0; i < forms.length; i++) {
+            forms[i].setAttribute('hidden', 'true');
+        }
+        for (var i = 0; i < tabs.length; i++) {
+            tabs[i].classList.remove('active');
+        }
+        document.querySelector('.tabs .tab[data-form="' + formName + '"]').classList.add('active');
+        document.querySelector('.' + formName).removeAttribute('hidden');
+    }
+
+    fetch('https://api.currentsapi.services/v1/latest-news?language=en&category=technology&apiKey=duEPOeOjRjvhhf27CuSh24FisQJvGppAgBbcWG34UF_I75D1')
+        .then(response => response.json())
+        .then(data => {
+            const newsList = document.getElementById('newsList');
+            data.news.forEach(article => {
+                const articleDiv = document.createElement('div');
+                articleDiv.classList.add('article');
+
+                const img = document.createElement('img');
+                img.src = article.image;
+
+                const title = document.createElement('h3');
+                title.textContent = article.title;
+
+                const description = document.createElement('p');
+                description.textContent = article.description;
+
+                articleDiv.appendChild(img);
+                articleDiv.appendChild(title);
+                articleDiv.appendChild(description);
+
+                articleDiv.addEventListener('click', () => {
+                    window.open(article.url, '_blank');
+                });
+
+                newsList.appendChild(articleDiv);
+            });
+            showForm('upload');
+        })
+        .catch(error => {
+            console.error('Error fetching news:', error);
+            showForm('upload');
+        });
+    document.getElementById('photo').addEventListener('change', function() {
+        var file = this.files[0];
+        if (file) {
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                var imagePreview = document.getElementById('imagePreview');
+                imagePreview.innerHTML = ''; // Очистка предыдущего превью
+                var img = document.createElement('img');
+                img.src = event.target.result;
+                img.style.maxWidth = '100%'; // Максимальная ширина превью
+                img.style.height = 'auto'; // Автоматическая высота
+                imagePreview.appendChild(img); // Добавление превью
+            }
+            reader.readAsDataURL(file); // Преобразование файла в строку данных URL
+        }
+    });
+</script>
+</body>
+</html>
